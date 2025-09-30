@@ -1,8 +1,9 @@
 # A simple LLM solution to interact with the user and provide responses based on user input.
 import os
-
+from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.prompts import ChatPromptTemplat
+from langchain_core.prompts import ChatPromptTemplate
+load_dotenv()  # Load environment variables from .env file
 
 class SimpleAgent:
     # Initialize the agent with a specific LLM model and prompt template
@@ -15,23 +16,25 @@ class SimpleAgent:
         # Set the Gemini API key (replace YOUR_API_KEY with your actual key)
         os.environ["GOOGLE_API_KEY"] = os.getenv("GOOGLE_API_KEY")
 
-        # Initialize the LLM model and prompt template
+       # Initialize Gemini LLM
         self.llm = ChatGoogleGenerativeAI(model=model_name, temperature=temperature)
-        # Define a simple prompt template
-        self.prompt_template = PromptTemplate(
-            input_variables=["user_input"],
-            template="You are a helpful assistant. Answer the following question:\n\n{user_input}\n\nAnswer:"
+
+        # Define prompt template using new API
+        self.prompt = ChatPromptTemplate.from_template(
+            "You are a helpful assistant. Answer the following question:\n\n{user_input}\n\nAnswer:"
         )
+
         # Create the LLM chain with the model and prompt to handle user input and generate responses
         #  llm chain is used to combine the LLM and the prompt template
         # it takes the user input, applies the prompt template, and generates a response using the LLM
-        self.chain = LLMChain(llm=self.llm, prompt=self.prompt_template)
+        self.chain = self.prompt | self.llm
         
 
 
     def get_response(self, user_input):
-        response = self.chain.run(user_input=user_input)
-        return response
+         # invoke replaces run()
+        response = self.chain.invoke({"user_input": user_input})
+        return response.content   # response is an AIMessage object
     
 if __name__ == "__main__":
     # Example usage of the SimpleAgent
