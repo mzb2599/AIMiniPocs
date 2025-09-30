@@ -1,13 +1,19 @@
 # A simple LLM solution to interact with the user and provide responses based on user input.
 import os
-from langchain import LLMChain, PromptTemplate
+
 from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_core.prompts import ChatPromptTemplat
 
 class SimpleAgent:
     # Initialize the agent with a specific LLM model and prompt template
     def __init__(self, model_name="gemini-2.5-pro", temperature=0.7):
+
+        # Check if the GOOGLE_API_KEY environment variable is set
+        
+        if "GOOGLE_API_KEY" not in os.environ:
+            raise ValueError("Set GOOGLE_API_KEY environment variable")
         # Set the Gemini API key (replace YOUR_API_KEY with your actual key)
-        os.environ["GOOGLE_API_KEY"] = "AIzaSyDDb1ET6ycD4-guliZ5SZYqsqCQTNgPnRw"
+        os.environ["GOOGLE_API_KEY"] = os.getenv("GOOGLE_API_KEY")
 
         # Initialize the LLM model and prompt template
         self.llm = ChatGoogleGenerativeAI(model=model_name, temperature=temperature)
