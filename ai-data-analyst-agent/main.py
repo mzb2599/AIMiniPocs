@@ -7,7 +7,7 @@ import requests
 def ask_AI(prompt: str) -> str:
     try:
         response = requests.post(
-            "http://localhost:11434/api/generate",  # <-- Ollama local endpoint
+            "http://localhost:11434/api/generate", 
             json={"model": "llama3", "prompt": prompt, "stream": False}
         )
         return response.json().get("response", "")
