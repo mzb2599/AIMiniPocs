@@ -70,15 +70,19 @@ def ask(q: str):
         context = "\n\n".join(context_chunks)
 
         prompt = f"""
-You are a knowledgeable Islamic scholar and historian.
-Answer ONLY using Nahjul Balagha text provided.
-Do not hallucinate or infer beyond given text.
+You are an Islamic scholar specializing in Nahjul Balagha.
 
-QUESTION:
+Use ONLY the provided context to answer the question.
+If the answer is not present, say "Not found in Nahjul Balagha".
+
+Context:
+{context_chunks}
+
+Question:
 {q}
 
-CONTEXT:
-{context}
+Answer in a clear, structured, and respectful tone.
+Also cite references like (Sermon 12, Page 53)
 """
 
         answer = ask_llm(prompt)
@@ -90,3 +94,12 @@ CONTEXT:
 
     except Exception as e:
         return {"error": str(e)}
+    
+def sermons():
+    return [d for d in data if d["type"] == "sermon"]
+
+def letters():
+    return [d for d in data if d["type"] == "letter"]
+
+def sayings():
+    return [d for d in data if d["type"] == "saying"]
