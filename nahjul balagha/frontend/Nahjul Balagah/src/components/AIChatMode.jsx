@@ -22,21 +22,12 @@ function AIChatMode() {
     setMessages((prev) => [...prev, { role: "user", text: userMsg }]);
     setLoading(true);
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          system:
-            "You are a knowledgeable and reverent guide to Nahjul Balagah — the collection of sermons, letters, and sayings of Imam Ali ibn Abi Talib (AS). Answer questions about its contents, themes, historical context, and wisdom. When quoting, provide Arabic text and translation. Be respectful, scholarly, and insightful. Keep answers concise but illuminating.",
-          messages: [{ role: "user", content: userMsg }],
-        }),
-      });
+      // proxy request through backend to avoid CORS and hide API key
+      const base = import.meta.env.VITE_API_URL || "/api";
+      const res = await fetch(`${base}/ask?q=${encodeURIComponent(userMsg)}`);
       const data = await res.json();
       const text =
-        data.content?.map((b) => b.text || "").join("") ||
-        "I could not retrieve a response at this time.";
+        data.answer || "I could not retrieve a response at this time.";
       setMessages((prev) => [...prev, { role: "assistant", text }]);
     } catch {
       setMessages((prev) => [
