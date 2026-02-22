@@ -24,6 +24,7 @@ export default function App() {
     if (activeTab === "ai") return;
     setLoadingItems(true);
     setError(null);
+    setItems([]); // drop previous results immediately so we don't flash wrong cards
     const base = import.meta.env.VITE_API_URL || "/api";
     fetch(`${base}/${activeTab}`)
       .then((res) => {
@@ -398,13 +399,14 @@ export default function App() {
                 </div>
 
                 {/* Cards */}
-                {items.map((item) => (
-                  <ContentCard
-                    key={item.id}
-                    item={item}
-                    onClick={setSelectedItem}
-                  />
-                ))}
+                {!loadingItems &&
+                  items.map((item) => (
+                    <ContentCard
+                      key={item.id}
+                      item={item}
+                      onClick={setSelectedItem}
+                    />
+                  ))}
               </>
             )}
 

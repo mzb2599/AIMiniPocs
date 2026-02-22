@@ -23,7 +23,41 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 model_embed = SentenceTransformer(EMBEDDING_MODEL)
 
 index = faiss.read_index(str(FAISS_INDEX_FILE))
+
+# full dataset used for semantic search
 data = json.loads((BASE_DIR / "data" / "nahjul_balaghah_full.json").read_text(encoding="utf-8"))
+
+# load helper for category files
+
+def _load_category(name: str):
+    """Read JSON list from backend/data/<name> and normalize each entry.
+    Normalization ensures the frontend receives objects with at least:
+    id, title, text, excerpt (short preview) and optional arabic.
+    The original files may use different fields (text/saying, title, etc)."""
+    path = BASE_DIR / "backend" / "data" / name
+    if not path.exists():
+        return []
+
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    normalized = []
+    for d in raw:
+        text_val = d.get("text") or d.get("saying") or ""
+        item = {
+            "id": d.get("id") or d.get("saying_number") or str(len(normalized)),
+            "title": d.get("title")
+            or (f"Saying {d.get('saying_number')}" if d.get("saying_number") else ""),
+            "arabic": d.get("arabic"),
+            "text": text_val,
+        }
+        # excerpt: first 100 chars or existing excerpt field
+        if d.get("excerpt"):
+            item["excerpt"] = d.get("excerpt")
+        else:
+            item["excerpt"] = (
+                text_val[:100] + "..." if text_val and len(text_val) > 100 else text_val
+            )
+        normalized.append(item)
+    return normalized
 
 def ask_llm(prompt: str) -> str:
     try:
@@ -95,11 +129,17 @@ Also cite references like (Sermon 12, Page 53)
     except Exception as e:
         return {"error": str(e)}
     
+@app.get("/sermons")
 def sermons():
-    return [d for d in data if d["type"] == "sermon"]
+    """Return sermons list loaded from the backend/data file."""
+    return _load_category("sermons.json")
 
+@app.get("/letters")
 def letters():
-    return [d for d in data if d["type"] == "letter"]
+    """Return letters list loaded from the backend/data file."""
+    return _load_category("letters.json")
 
+@app.get("/sayings")
 def sayings():
-    return [d for d in data if d["type"] == "saying"]
+    """Return sayings list loaded from the backend/data file."""
+    return _load_category("sayings.json")

@@ -82,10 +82,11 @@ function ContentCard({ item, onClick }) {
           fontStyle: "italic",
         }}
       >
-        {item.excerpt &&
-          (item.excerpt.length > 100
-            ? item.excerpt.slice(0, 100) + "..."
-            : item.excerpt)}
+        {((item.excerpt || item.text) &&
+          ((item.excerpt || item.text).length > 100
+            ? (item.excerpt || item.text).slice(0, 100) + "..."
+            : item.excerpt || item.text)) ||
+          null}
       </div>
     </div>
   );

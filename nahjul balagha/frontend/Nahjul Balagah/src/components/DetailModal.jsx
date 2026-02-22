@@ -98,7 +98,7 @@ function DetailModal({ item, onClose }) {
             margin: "16px 0",
           }}
         >
-          {item.excerpt}
+          {item.text || item.excerpt}
         </p>
         <button
           onClick={onClose}
